@@ -2,11 +2,11 @@
 
 namespace League\Flysystem\Replicate;
 
-use League\Flysystem\AdapterInterface;
+use League\Flysystem\Adapter\AbstractAdapter;
 use League\Flysystem\Config;
 use League\Flysystem\Util;
 
-class ReplicateAdapter implements AdapterInterface
+class ReplicateAdapter extends AbstractAdapter
 {
     /**
      * @var AdapterInterface
@@ -81,49 +81,13 @@ class ReplicateAdapter implements AdapterInterface
     /**
      * {@inheritdoc}
      */
-    public function update($path, $contents, Config $config)
+    public function move($path, $newpath)
     {
-        if (! $this->source->update($path, $contents, $config)) {
+        if (! $this->source->move($path, $newpath)) {
             return false;
         }
 
-        if ($this->replica->has($path)) {
-            return $this->replica->update($path, $contents, $config);
-        } else {
-            return $this->replica->write($path, $contents, $config);
-        }
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function updateStream($path, $resource, Config $config)
-    {
-        if (! $this->source->updateStream($path, $resource, $config)) {
-            return false;
-        }
-
-        if (! $resource = $this->ensureSeekable($resource, $path)) {
-            return false;
-        }
-
-        if ($this->replica->has($path)) {
-            return $this->replica->updateStream($path, $resource, $config);
-        } else {
-            return $this->replica->writeStream($path, $resource, $config);
-        }
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function rename($path, $newpath)
-    {
-        if (! $this->source->rename($path, $newpath)) {
-            return false;
-        }
-
-        return $this->replica->rename($path, $newpath);
+        return $this->replica->move($path, $newpath);
     }
 
     /**
@@ -147,7 +111,7 @@ class ReplicateAdapter implements AdapterInterface
             return false;
         }
 
-        if ($this->replica->has($path)) {
+        if ($this->replica->fileExists($path)) {
             return $this->replica->delete($path);
         }
 
@@ -169,21 +133,21 @@ class ReplicateAdapter implements AdapterInterface
     /**
      * {@inheritdoc}
      */
-    public function createDir($dirname, Config $config)
+    public function createDirectory($dirname, Config $config)
     {
-        if (! $this->source->createDir($dirname, $config)) {
+        if (! $this->source->createDirectory($dirname, $config)) {
             return false;
         }
 
-        return $this->replica->createDir($dirname, $config);
+        return $this->replica->createDirectory($dirname, $config);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function has($path)
+    public function fileExists($path)
     {
-        return $this->source->has($path);
+        return $this->source->fileExists($path);
     }
 
     /**
@@ -221,33 +185,33 @@ class ReplicateAdapter implements AdapterInterface
     /**
      * {@inheritdoc}
      */
-    public function getSize($path)
+    public function fileSize($path)
     {
-        return $this->source->getSize($path);
+        return $this->source->fileSize($path);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function getMimetype($path)
+    public function mimeType($path)
     {
-        return $this->source->getMimetype($path);
+        return $this->source->mimeType($path);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function getTimestamp($path)
+    public function lastModified($path)
     {
-        return $this->source->getTimestamp($path);
+        return $this->source->lastModified($path);
     }
 
     /**
      * {@inheritdoc}
      */
-    public function getVisibility($path)
+    public function visibility($path)
     {
-        return $this->source->getVisibility($path);
+        return $this->source->visibility($path);
     }
 
     /**
